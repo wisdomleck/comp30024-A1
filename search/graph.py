@@ -16,8 +16,18 @@ TILES =    [(4, -4), (4, -3), (4, -2), (4, -1), (4, 0),
         (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3), (-3, 4),
             (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4)]
 
+
+
+""" Defines a move class. Turn, (r,q) source, (r,q) dest. Assumes the move
+is valid """
 class Move:
     def __init__(self, t, r_a, q_a, r_b, q_b):
+        self.turn = t
+        self.from_r = r_a
+        self.from_q = q_a
+        self.to_r = r_b
+        self.to_q = q_b
+
 
 """ Initialise a graph by passing in a root node. This node then
 will store edges out to other nodes """
@@ -60,4 +70,12 @@ class Node:
     def won_state(self):
         return
 
-    def apply_move(self, move1, move2 = None, move3 = None):
+    # Applies a given move for a single piece to the board
+    def apply_single_move(self, move):
+
+    # Applies a list of moves for each piece to the board
+    # We greedily assume that there will never be two pieces of different type on the same tile
+    # If we have two of the same piece on the same tile, should work fine
+    def apply_move(self, moves):
+        newboardstate = Node(self.boardstate, self.depth + 1)
+        return

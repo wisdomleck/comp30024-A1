@@ -151,12 +151,14 @@ def print_board(board_dict, message="", compact=True, ansi=False, **kwargs):
     board = template.format(multiline_message, *cells)
     print(board, **kwargs)
 
+""" FILL IN """
 def game_over(matchups):
     for matchup in matchups.values():
         if matchup[1] != 0:
             return False
     return True
 
+""" FILL IN """
 def matchups(board):
     matchups = {"p": ["R", 0], "s": ["P", 0], "r": ["S", 0]}
     for token in board["lower"]:
@@ -168,6 +170,10 @@ def matchups(board):
             matchups["r"][1] += 1
     return matchups
 
+""" Reformats the input json file into a dict to be used by other functions. Dict
+is in form of coordinates as values, piece as key.
+(r,q) : piece
+"""
 def reformat_board(board):
     reformatted_board = {}
     for unit, pieces in board.items():
