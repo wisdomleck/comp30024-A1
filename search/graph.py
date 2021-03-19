@@ -44,6 +44,7 @@ class Node:
     def __init__(self, boardstate, depth):
         self.boardstate = boardstate
         self.adj_list = []
+        # Implicitly tells us which move it is?
         self.depth = depth
 
     # Fill in this node with a list of adjacent nodes, generated from moving pieces
@@ -64,18 +65,35 @@ class Node:
 
     # Returns number of enemy (lower pieces left)
     def enemy_pieces_left(self):
-        return len(get_enemy_pieces(self))
+        return len(self.get_enemy_pieces())
 
     # Returns whether the game is in a won state given by the rules
+    # Won state if the other player has 0 tokens, or if we have invincible token and other player has 1 token not invincible
+    # But for Part A, we win if and only if the lower player has 0 tokens left
     def won_state(self):
-        return
+        return len(self.get_enemy_pieces()) == 0
 
-    # Applies a given move for a single piece to the board
+    # Applies a given move for a single piece to the board. Returns updated board
+    # ASSUMES the move is valid. Ie the tile contains a piece that we control
+    # Should we never move a piece to a tile that has another tile?
     def apply_single_move(self, move):
+        (row, col) = (move.from_r, move.from_q)
+        (newrow, newcol) = (move.to_r, move.to_q)
+        piece = (self.boardstate)[(row,col)]
 
-    # Applies a list of moves for each piece to the board
+        # Moving a piece means the old coord no longer is occupied
+        del (self.boardstate)[(row, col)]
+
+        # The new tile moves to occupies the piece now
+        (self.boardstate)[(newrow, newcol)] = piece
+
+        return self.boardstate
+
+    # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
     # We greedily assume that there will never be two pieces of different type on the same tile
     # If we have two of the same piece on the same tile, should work fine
-    def apply_move(self, moves):
+    def apply_turn(self, moves):
         newboardstate = Node(self.boardstate, self.depth + 1)
-        return
+        for move in moves:
+            newboardstate.boardstate = newboardstate.apply_single_move(move)
+        return newboardstate
