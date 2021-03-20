@@ -158,25 +158,25 @@ def game_over(matchups):
     return True
 
 def matchups(board):
-    matchups = {"p": ["R", 0], "s": ["P", 0], "r": ["S", 0]}
+    matchups = {"P": ["r", 0], "S": ["p", 0], "R": ["s", 0]}
     for token in board["lower"]:
-        if token[0] == "R":
-            matchups["p"][1] += 1
-        elif token[0] == "P":
-            matchups["s"][1] += 1
+        if token[0] == "r":
+            matchups["P"][1] += 1
+        elif token[0] == "p":
+            matchups["S"][1] += 1
         else:
-            matchups["r"][1] += 1
+            matchups["R"][1] += 1
     return matchups
 
 def reformat_board(board):
-    reformatted_board = {}
+    reformatted_board = OrderedDict()
     for unit, pieces in board.items():
         for piece in pieces:
              position = (piece[1], piece[2])
              if unit == "upper":
-                 reformatted_board[position] = piece[0]
-             elif unit == "lower":
                  reformatted_board[position] = piece[0].upper()
+             elif unit == "lower":
+                 reformatted_board[position] = piece[0]
              else:
                  reformatted_board[position] = "B"
     return reformatted_board
