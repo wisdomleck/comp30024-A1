@@ -1,70 +1,99 @@
-def to_graph(board):
-    roots = []
-    nodes = {}
-    ran = range(-4, +4+1)
-    cells = [(r,q) for r in ran for q in ran if -r-q in ran]
-    for rq in cells:
-        if rq in board and board[rq] == "B":
-            continue
+""" This file contains class definitions that we will use to represent the game
+as a set of states/nodes in a graph. Some definitions here are useful to represent
+possible coordinates on the board, or possible moves """
 
-        newNode = Node(rq)
-        if rq in board:
-            newNode.place_token(board[rq])
-            print(board[rq])
-            if board[rq].islower():
-                roots.append(newNode)
+""" Directions that a piece can move """
+MOVES = [(0,-1), (0, 1), (1,-1), (1,0), (-1,0), (-1,-1)]
 
-        adjacents = [(rq[0], rq[1]-1), (rq[0]-1, rq[1]), (rq[0]-1, rq[1]+1)]
-        for adj in adjacents:
-            if adj in nodes:
-                newNode.add_neighbour(nodes[adj])
-        nodes[rq] = newNode
+""" Valid squares on the board. Relevant since the board isn't square """
+TILES =    [(4, -4), (4, -3), (4, -2), (4, -1), (4, 0),
+        (3, -4), (3, -3), (3, -2), (3, -1), (3, 0), (3, 1),
+      (2, -4), (2, -3), (2, -2), (2, -1), (2, 0), (2, 1), (2, 2),
+   (1, -4), (1, -3), (1, -2), (1, -1), (1, 0), (1, 1), (1, 2), (1, 3),
+(0, -4), (0, -3), (0, -2), (0, -1), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
+   (-1, -3), (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2), (-1, 3), (-1, 4),
+      (-2, -2), (-2, -1), (-2, 0), (-2, 1), (-2, 2), (-2, 3), (-2, 4),
+        (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3), (-3, 4),
+            (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4)]
 
-    graphs = []
-    for root in roots:
-        graphs.append(Graph(root))
 
-    return graphs
 
+""" Defines a move class. Turn, (r,q) source, (r,q) dest. Assumes the move
+is valid """
+class Move:
+    def __init__(self, t, r_a, q_a, r_b, q_b):
+        self.turn = t
+        self.from_r = r_a
+        self.from_q = q_a
+        self.to_r = r_b
+        self.to_q = q_b
+
+
+""" Initialise a graph by passing in a root node. This node then
+will store edges out to other nodes """
 class Graph:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, initial_state):
+        self.initial_state = initial_state
 
-    def move_root(self,neighbour):
-        neighbour.token = self.root.token
-        self.root.token = "E"
-        self.root = neighbour
 
-    def iterative_DS(self, target):
-        i = 1
-        while True:
-            path = self.depth_first(self.root, target, i)
-            i += 1
-            if path:
-                return path
 
-    def depth_first(self, root, target, depth):
-        if depth == 0:
-            return False
-        print(root.position)
-        for adjacent in root.neighbours:
-            if adjacent.token == target:
-                return [adjacent]
-            path = self.depth_first(adjacent, target, depth-1)
-            if path:
-                return path.append(adjacent)
-        return False
-
+""" Node in a graph to represent the current board state. Might need to update later with
+edge weights, for now just keep track of the depth """
 
 class Node:
-    def __init__(self, position):
-        self.position = position
-        self.token = None
-        self.neighbours = []
+    def __init__(self, boardstate, depth):
+        self.boardstate = boardstate
+        self.adj_list = []
+        # Implicitly tells us which move it is?
+        self.depth = depth
 
-    def add_neighbour(self, adjacent):
-        self.neighbours.append(adjacent)
-        adjacent.neighbours.append(self)
+    # Fill in this node with a list of adjacent nodes, generated from moving pieces
+    def add_neighbours(self, newnodes):
+        self.adj_list = newnodes
 
-    def place_token(self, token):
-        self.token = token
+    # Might be useful when making a new, branching node
+    def get_depth(self):
+        return self.depth
+
+    # Returns list of enemy (lower) pieces
+    def get_enemy_pieces(self):
+        pieces_left = []
+        for key, value in self.boardstate:
+            if value == "p" or value == "r" or value == "s":
+                pieces_left.append(value)
+        return pieces_left
+
+    # Returns number of enemy (lower pieces left)
+    def enemy_pieces_left(self):
+        return len(self.get_enemy_pieces())
+
+    # Returns whether the game is in a won state given by the rules
+    # Won state if the other player has 0 tokens, or if we have invincible token and other player has 1 token not invincible
+    # But for Part A, we win if and only if the lower player has 0 tokens left
+    def won_state(self):
+        return len(self.get_enemy_pieces()) == 0
+
+    # Applies a given move for a single piece to the board. Returns updated board
+    # ASSUMES the move is valid. Ie the tile contains a piece that we control
+    # Should we never move a piece to a tile that has another tile?
+    def apply_single_move(self, move):
+        (row, col) = (move.from_r, move.from_q)
+        (newrow, newcol) = (move.to_r, move.to_q)
+        piece = (self.boardstate)[(row,col)]
+
+        # Moving a piece means the old coord no longer is occupied
+        del (self.boardstate)[(row, col)]
+
+        # The new tile moves to occupies the piece now
+        (self.boardstate)[(newrow, newcol)] = piece
+
+        return self.boardstate
+
+    # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
+    # We greedily assume that there will never be two pieces of different type on the same tile
+    # If we have two of the same piece on the same tile, should work fine
+    def apply_turn(self, moves):
+        newboardstate = Node(self.boardstate, self.depth + 1)
+        for move in moves:
+            newboardstate.boardstate = newboardstate.apply_single_move(move)
+        return newboardstate

@@ -1,0 +1,6 @@
+- assume that we should never move a piece to a tile that has another piece?
+- always take a swing move if we can?
+- how to make it so that two pieces dont chase the same enemy piece
+	- heuristic of total distance of each piece to every other piece?
+- shave off repeated nodes
+- can either do a search method and prune paths, or use a heuristic method and generate paths to a certain depth and take the path with the highest score

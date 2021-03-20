@@ -13,7 +13,7 @@ import json
 # inside the `search` directory (like this one and `util.py`) and
 # then import from them like this:
 from search.util import print_board, print_slide, print_swing, reformat_board, matchups, game_over
-from search.graph import to_graph
+from search.graph import Node, Move
 
 def main():
     try:
@@ -23,25 +23,16 @@ def main():
         print("usage: python3 -m search path/to/input.json", file=sys.stderr)
         sys.exit(1)
 
-    matches = matchups(data)
-    board = reformat_board(data)
-    graphs = to_graph(board)
-    print(board)
-    turn = 0
-    while not game_over(matches):
-        moves_list = []
-        for graph in graphs:
-            print(matches[graph.root.token][0])
-            path = graph.iterative_DS(matches[graph.root.token][0])
-            moves_list.append(path)
-            matches[graph.root.token][1] = max(0, matches[graph.root.token][1] - 1)
-        for move in zip(moves_list):
-            turn += 1
-            for i in range(len(move)):
-                r_a, p_a = graphs[i].root.position
-                r_b, p_b = round[i].position
-                print_slide(turn, r_a, p_a, r_b, p_b)
-                graph[i].move_root(round[i])
+    # TEST IF BOARD MOVE WORKS
+    firstNode = Node(reformat_board(data), 0)
+    print_board(firstNode.boardstate)
+    print(firstNode.boardstate)
+
+    # Move the scissor piece one square to the right
+    move1 = Move(1, 0, 3, 0, 4)
+    nextNode = firstNode.apply_turn([move1])
+    print_board(nextNode.boardstate)
+    print(nextNode.boardstate)
 
     # TODO:
     # Find and print a solution to the board configuration described
