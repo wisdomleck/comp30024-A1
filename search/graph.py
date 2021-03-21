@@ -21,8 +21,7 @@ TILES =    [(4, -4), (4, -3), (4, -2), (4, -1), (4, 0),
 """ Defines a move class. Turn, (r,q) source, (r,q) dest. Assumes the move
 is valid """
 class Move:
-    def __init__(self, t, r_a, q_a, r_b, q_b):
-        self.turn = t
+    def __init__(self, r_a, q_a, r_b, q_b):
         self.from_r = r_a
         self.from_q = q_a
         self.to_r = r_b
@@ -73,27 +72,30 @@ class Node:
     def won_state(self):
         return len(self.get_enemy_pieces()) == 0
 
-    # Applies a given move for a single piece to the board. Returns updated board
+    # redo this
+    # Applies a given move for a single piece to the board. Returns a new updated board dict
     # ASSUMES the move is valid. Ie the tile contains a piece that we control
-    # Should we never move a piece to a tile that has another tile?
     def apply_single_move(self, move):
+        # copy the dictionary
+        newboardstate = (self.boardstate).copy()
+
         (row, col) = (move.from_r, move.from_q)
         (newrow, newcol) = (move.to_r, move.to_q)
         piece = (self.boardstate)[(row,col)]
 
         # Moving a piece means the old coord no longer is occupied
-        del (self.boardstate)[(row, col)]
+        del (newboardstate)[(row, col)]
 
         # The new tile moves to occupies the piece now
-        (self.boardstate)[(newrow, newcol)] = piece
+        newboardstate[(newrow, newcol)] = piece
 
-        return self.boardstate
+        return newboardstate
 
     # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
     # We greedily assume that there will never be two pieces of different type on the same tile
     # If we have two of the same piece on the same tile, should work fine
     def apply_turn(self, moves):
-        newboardstate = Node(self.boardstate, self.depth + 1)
+        newnode = Node(self.boardstate, self.depth + 1)
         for move in moves:
-            newboardstate.boardstate = newboardstate.apply_single_move(move)
-        return newboardstate
+            newnode.boardstate = newnode.apply_single_move(move)
+        return newnode
