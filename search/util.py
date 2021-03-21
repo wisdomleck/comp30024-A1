@@ -175,7 +175,7 @@ is in form of coordinates as values, piece as key.
 (r,q) : piece
 """
 def reformat_board(board):
-    reformatted_board = OrderedDict()
+    reformatted_board = {}
     for unit, pieces in board.items():
         for piece in pieces:
              position = (piece[1], piece[2])

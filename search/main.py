@@ -14,6 +14,7 @@ import json
 # then import from them like this:
 from search.util import print_board, print_slide, print_swing, reformat_board, matchups, game_over
 from search.graph import Node, Move
+from search.search import generate_adjacents
 
 def main():
     try:
@@ -26,13 +27,14 @@ def main():
     # TEST IF BOARD MOVE WORKS
     firstNode = Node(reformat_board(data), 0)
     print_board(firstNode.boardstate)
-    print(firstNode.boardstate)
+    #print(firstNode.boardstate)
 
+    generate_adjacents(firstNode)
     # Move the scissor piece one square to the right
-    move1 = Move(1, 0, 3, 0, 4)
-    nextNode = firstNode.apply_turn([move1])
-    print_board(nextNode.boardstate)
-    print(nextNode.boardstate)
+    #move1 = Move(1, 0, 3, 0, 4)
+    #nextNode = firstNode.apply_turn([move1])
+    #print_board(nextNode.boardstate)
+    #print(nextNode.boardstate)
 
     # TODO:
     # Find and print a solution to the board configuration described
