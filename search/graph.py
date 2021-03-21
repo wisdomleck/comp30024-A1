@@ -75,7 +75,6 @@ class Node:
 
     # Applies a given move for a single piece to the board. Returns updated board
     # ASSUMES the move is valid. Ie the tile contains a piece that we control
-    # Should we never move a piece to a tile that has another tile?
     def apply_single_move(self, move):
         (row, col) = (move.from_r, move.from_q)
         (newrow, newcol) = (move.to_r, move.to_q)
