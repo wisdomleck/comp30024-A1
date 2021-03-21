@@ -84,7 +84,7 @@ class Node:
         piece = (self.boardstate)[(row,col)]
 
         # Moving a piece means the old coord no longer is occupied
-        del (self.newboardstate)[(row, col)]
+        del (newboardstate)[(row, col)]
 
         # The new tile moves to occupies the piece now
         newboardstate[(newrow, newcol)] = piece
@@ -95,7 +95,7 @@ class Node:
     # We greedily assume that there will never be two pieces of different type on the same tile
     # If we have two of the same piece on the same tile, should work fine
     def apply_turn(self, moves):
-        newboardstate = Node(self.boardstate, self.depth + 1)
+        newnode = Node(self.boardstate, self.depth + 1)
         for move in moves:
-            newboardstate.boardstate = newboardstate.apply_single_move(move)
-        return newboardstate
+            newnode.boardstate = newnode.apply_single_move(move)
+        return newnode
