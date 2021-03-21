@@ -3,7 +3,7 @@ as a set of states/nodes in a graph. Some definitions here are useful to represe
 possible coordinates on the board, or possible moves """
 
 """ Directions that a piece can move """
-MOVES = [(0,-1), (0, 1), (1,-1), (1,0), (-1,0), (-1,-1)]
+MOVES = [(0,-1), (0, 1), (1,-1), (1,0), (-1,0), (-1, 1)]
 
 """ Valid squares on the board. Relevant since the board isn't square """
 TILES =    [(4, -4), (4, -3), (4, -2), (4, -1), (4, 0),
@@ -16,7 +16,11 @@ TILES =    [(4, -4), (4, -3), (4, -2), (4, -1), (4, 0),
         (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3), (-3, 4),
             (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4)]
 
+COUNTER = {"R" : "s", "P": "r", "S": "p"}
+# Uninitialised value for distance in heuristic
+BIGDIST = 1000000
 
+ALLIED_PIECES = ["R", "S", "P"]
 
 """ Defines a move class. Turn, (r,q) source, (r,q) dest. Assumes the move
 is valid """
@@ -99,3 +103,38 @@ class Node:
         for move in moves:
             newnode.boardstate = newnode.apply_single_move(move)
         return newnode
+
+
+    # Calculates the manhattan distance from two tiles on the hexagonal board
+    def distance(self, coord1, coord2):
+        (r1, c1) = coord1
+        (r2, c2) = coord2
+
+        dr = r1 - r2
+        dc = c1 - c2
+        if sign(dr) == sign(dc):
+            return abs(dr + dc)
+        else:
+            return max(abs(dr), abs(dc))
+
+    # TEST
+    # calculate the minimum distance from an instance of piece to its closest piece it can eat
+    def min_distance(self, coord, piece_type):
+        mindist = BIGDIST
+        for key, value in self.boardstate:
+            if value == COUNTER[piece_type]:
+                if distance(coord, key) < mindist:
+                    mindist = distance(key, key2)
+        return mindist
+
+    # test this
+    def give_heuristic_value(self):
+        heuristic = 0
+        # for each allied piece, calculate the min distance to each piece it can eat. if not there, then assign 0
+        for key, value in self.boardstate:
+            if value in ALLIED_PIECES:
+                if COUNTER[value] in self.get_enemy_pieces:
+                    heuristic += min_distance(key, value)
+                else:
+                    continue
+        return heuristic

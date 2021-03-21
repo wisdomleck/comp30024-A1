@@ -13,7 +13,7 @@ import json
 # inside the `search` directory (like this one and `util.py`) and
 # then import from them like this:
 from search.util import print_board, print_slide, print_swing, reformat_board, matchups, game_over
-from search.graph import Node, Move
+from search.graph import Node, Move, COUNTER
 
 def main():
     try:
@@ -29,11 +29,13 @@ def main():
     print(firstNode.boardstate)
 
     # Move the scissor piece one square to the right
-    move1 = Move(1, 0, 3, 0, 4)
+    move1 = Move(0, 3, 0, 4)
     nextNode = firstNode.apply_turn([move1])
     print_board(nextNode.boardstate)
     print(nextNode.boardstate)
 
+
+    print(COUNTER)
     # TODO:
     # Find and print a solution to the board configuration described
     # by `data`.
