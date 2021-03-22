@@ -14,6 +14,9 @@ import json
 # then import from them like this:
 from search.util import print_board, print_slide, print_swing, reformat_board, matchups, game_over
 from search.graph import Node, Move, COUNTER
+from search.search import generate_adjacents
+from search.graph import Node, Move, Graph
+from search.search import generate_adjacents, iterative_depth_search
 
 def main():
     try:
@@ -27,10 +30,13 @@ def main():
     firstNode = Node(reformat_board(data), 0)
     graph = Graph(firstNode)
 
-    generate_adjacents(firstNode)
-    solution_states = iterative_depth_search(graph)
-    for state in solution_states:
-        print_board(state.boardstate)
+    #generate_adjacents(firstNode)
+    #solution_states = iterative_depth_search(graph)
+    #for state in solution_states:
+    #    print_board(state.boardstate)
+
+    print_board(firstNode.boardstate)
+    print("heuristic:", firstNode.give_heuristic_value())
 
     # TODO:
     # Find and print a solution to the board configuration described

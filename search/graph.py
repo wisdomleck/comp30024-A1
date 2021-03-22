@@ -35,6 +35,8 @@ class Move:
 """ Initialise a graph by passing in a root node. This node then
 will store edges out to other nodes """
 class Graph:
+    def __init__(self, initial_state):
+        self.initial_state = initial_state
     def __init__(self, root):
         self.root = root
 
@@ -61,11 +63,7 @@ class Node:
     # Returns list of enemy (lower) pieces
     def get_enemy_pieces(self):
         pieces_left = []
-<<<<<<< HEAD
         for key, value in (self.boardstate).items():
-=======
-        for key, value in self.boardstate.items():
->>>>>>> c791a8eb6720b54f5cc9eaf4deb63c0ae47e0d49
             if value == "p" or value == "r" or value == "s":
                 pieces_left.append(value)
         return pieces_left
