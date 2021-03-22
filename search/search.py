@@ -1,5 +1,5 @@
 from itertools import product
-from search.graph import Node
+from search.graph import Node, Move
 
 
 def generate_adjacents(node):
@@ -8,7 +8,6 @@ def generate_adjacents(node):
     defined by all nodes whose board states can be reached with one move in the
     current baord state.
     """
-
     # Makes a dictionary where keys are current upper token positions and
     # values are the list of positions attainable from one slide move
     slide_moves = {}
@@ -37,7 +36,7 @@ def generate_adjacents(node):
             moves.append(Move(r_a, q_a, r_b, q_b))
         adjacent_nodes.append(node.apply_turn(moves))
 
-    return adjacent_nodes
+    node.add_neighbours(adjacent_nodes)
 
 def get_swing_moves(position, slide_moves):
     """
@@ -64,3 +63,38 @@ def get_slide_moves(position, board):
     ran = range(-4,5)
     return [(r+i, q+j) for i in [-1,0,1] for j in [-1,0,1]
             if i != j and -(r+i)-(q+j) in ran and (r+i, q+j) not in blocks]
+
+
+def iterative_depth_search(graph):
+    """
+    Applies an iterative depth search of graph representing the game, calling a
+    depth first search on incrementally larger depths until a path to victory
+    is found
+    """
+    i = 0
+    path = False
+    while not path:
+        path = depth_first_search(graph.root, i)
+        i += 1
+    return path
+
+def depth_first_search(root, depth):
+    """
+    Visits adjacent board states in a depth first traversal until a win state is
+    found. When found, the path to the win state is returned.
+    """
+    if root.won_state():
+        return [root]
+
+    if depth == 0:
+        return False
+
+    if not root.adj_list:
+        generate_adjacents(root)
+
+    for adjacent in root.adj_list:
+        path = depth_first_search(adjacent, depth - 1)
+        if path:
+            path.insert(0, root)
+            return path
+    return False
