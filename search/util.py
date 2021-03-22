@@ -160,14 +160,14 @@ def game_over(matchups):
 
 """ FILL IN """
 def matchups(board):
-    matchups = {"p": ["R", 0], "s": ["P", 0], "r": ["S", 0]}
+    matchups = {"P": ["r", 0], "S": ["p", 0], "R": ["s", 0]}
     for token in board["lower"]:
-        if token[0] == "R":
-            matchups["p"][1] += 1
-        elif token[0] == "P":
-            matchups["s"][1] += 1
+        if token[0] == "r":
+            matchups["P"][1] += 1
+        elif token[0] == "p":
+            matchups["S"][1] += 1
         else:
-            matchups["r"][1] += 1
+            matchups["R"][1] += 1
     return matchups
 
 """ Reformats the input json file into a dict to be used by other functions. Dict

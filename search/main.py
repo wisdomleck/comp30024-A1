@@ -25,18 +25,12 @@ def main():
 
     # TEST IF BOARD MOVE WORKS
     firstNode = Node(reformat_board(data), 0)
-    print_board(firstNode.boardstate)
-    print(firstNode.boardstate)
-    print("Heuristic value:", firstNode.give_heuristic_value())
-    # Move the scissor piece one square to the right
-    #move1 = Move(0, 3, 0, 4)
-    #nextNode = firstNode.apply_turn([move1])
-    #print_board(nextNode.boardstate)
-    #print(nextNode.boardstate)
+    graph = Graph(firstNode)
 
-
-    #print(COUNTER)
-
+    generate_adjacents(firstNode)
+    solution_states = iterative_depth_search(graph)
+    for state in solution_states:
+        print_board(state.boardstate)
 
     # TODO:
     # Find and print a solution to the board configuration described
