@@ -61,7 +61,7 @@ class Node:
     # Returns list of enemy (lower) pieces
     def get_enemy_pieces(self):
         pieces_left = []
-        for key, value in self.boardstate:
+        for key, value in (self.boardstate).items():
             if value == "p" or value == "r" or value == "s":
                 pieces_left.append(value)
         return pieces_left
@@ -112,7 +112,7 @@ class Node:
 
         dr = r1 - r2
         dc = c1 - c2
-        if sign(dr) == sign(dc):
+        if (dr < 0 and dc < 0) or (dr > 0 and dc > 0):
             return abs(dr + dc)
         else:
             return max(abs(dr), abs(dc))
@@ -121,20 +121,20 @@ class Node:
     # calculate the minimum distance from an instance of piece to its closest piece it can eat
     def min_distance(self, coord, piece_type):
         mindist = BIGDIST
-        for key, value in self.boardstate:
+        for key, value in (self.boardstate).items():
             if value == COUNTER[piece_type]:
-                if distance(coord, key) < mindist:
-                    mindist = distance(key, key2)
+                if self.distance(coord, key) < mindist:
+                    mindist = self.distance(coord, key)
         return mindist
 
     # test this
     def give_heuristic_value(self):
         heuristic = 0
         # for each allied piece, calculate the min distance to each piece it can eat. if not there, then assign 0
-        for key, value in self.boardstate:
+        for key, value in (self.boardstate).items():
             if value in ALLIED_PIECES:
-                if COUNTER[value] in self.get_enemy_pieces:
-                    heuristic += min_distance(key, value)
+                if COUNTER[value] in self.get_enemy_pieces():
+                    heuristic += self.min_distance(key, value)
                 else:
                     continue
         return heuristic

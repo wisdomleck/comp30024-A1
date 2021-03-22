@@ -180,9 +180,9 @@ def reformat_board(board):
         for piece in pieces:
              position = (piece[1], piece[2])
              if unit == "upper":
-                 reformatted_board[position] = piece[0]
-             elif unit == "lower":
                  reformatted_board[position] = piece[0].upper()
+             elif unit == "lower":
+                 reformatted_board[position] = piece[0]
              else:
                  reformatted_board[position] = "B"
     return reformatted_board

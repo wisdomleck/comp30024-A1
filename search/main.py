@@ -27,15 +27,17 @@ def main():
     firstNode = Node(reformat_board(data), 0)
     print_board(firstNode.boardstate)
     print(firstNode.boardstate)
-
+    print("Heuristic value:", firstNode.give_heuristic_value())
     # Move the scissor piece one square to the right
-    move1 = Move(0, 3, 0, 4)
-    nextNode = firstNode.apply_turn([move1])
-    print_board(nextNode.boardstate)
-    print(nextNode.boardstate)
+    #move1 = Move(0, 3, 0, 4)
+    #nextNode = firstNode.apply_turn([move1])
+    #print_board(nextNode.boardstate)
+    #print(nextNode.boardstate)
 
 
-    print(COUNTER)
+    #print(COUNTER)
+
+
     # TODO:
     # Find and print a solution to the board configuration described
     # by `data`.
