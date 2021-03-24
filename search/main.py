@@ -36,7 +36,8 @@ def main():
     #    print_board(state.boardstate)
 
     print_board(firstNode.boardstate)
-    print("heuristic:", firstNode.give_heuristic_value())
+    print("heuristic1:", firstNode.give_heuristic_value())
+    print("heuristic2:", firstNode.give_heuristic_value2())
 
     # TODO:
     # Find and print a solution to the board configuration described

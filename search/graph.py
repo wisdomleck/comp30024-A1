@@ -22,6 +22,9 @@ BIGDIST = 1000000
 
 ALLIED_PIECES = ["R", "S", "P"]
 
+
+import itertools
+
 """ Defines a move class. Turn, (r,q) source, (r,q) dest. Assumes the move
 is valid """
 class Move:
@@ -140,3 +143,54 @@ class Node:
                 else:
                     continue
         return heuristic
+
+    ##################################### HEURISTIC 2 WORK #####################################
+    # Gives the best pairing for pieces on the board for a given allied piece type
+    # get piece_type and tiles
+    # find the shortest distance from piece_tiles to each counter piece_tile
+    # add up distances
+    def give_pairings_combos(self, piece_type, piece_tiles):
+        points = []
+        # get all the counter points
+        for key, value in (self.boardstate).items():
+            if value == COUNTER[piece_type]:
+                points.append(key)
+        # Do all possible pairings
+        if(len(points) >= len(piece_tiles)):
+            combinations = [list(zip(x,piece_tiles)) for x in itertools.permutations(points,len(piece_tiles))]
+        else:
+            combinations = [list(zip(x,points)) for x in itertools.permutations(piece_tiles,len(points))]
+
+        return combinations
+
+    # Find the minimum distance pairings
+    def get_min_value_pairings(self, combinations):
+        mindist = 100000 # arbitrary
+        for list in combinations:
+            total = 0
+
+            # calculate total distance of given combinatino of pairs
+            for pair in list:
+                dist = self.distance(pair[0], pair[1])
+                total += dist
+
+            if total < mindist:
+                mindist = total
+        return mindist
+
+
+    # Heuristic of computing the smallest sum of all pairs given by give_shortest_dist_pairings
+    def give_heuristic_value2(self):
+        total_heuristic = 0
+        for piece in ALLIED_PIECES:
+            piece_tiles = []
+            enemy_tiles = []
+
+            # Get the tile coords of the allied piece type
+            for key, value in (self.boardstate).items():
+                if value == piece:
+                    piece_tiles.append(key)
+
+            total_heuristic += self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles))
+
+        return total_heuristic
