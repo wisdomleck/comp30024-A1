@@ -137,7 +137,6 @@ class Node:
         total_heuristic = 0
         for piece in ALLIED_PIECES:
             piece_tiles = []
-            enemy_tiles = []
 
             # Get the tile coords of the allied piece type
             for key, value in (self.boardstate).items():
