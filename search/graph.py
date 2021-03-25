@@ -3,6 +3,7 @@ as a set of states/nodes in a graph. Some definitions here are useful to represe
 possible coordinates on the board, or possible moves """
 
 from search.board_generator import generate_adjacents
+from itertools import permutations
 
 # Uninitialised value for distance in heuristic
 BIGDIST = 1000000
@@ -31,8 +32,8 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 = self.depth + self.give_heuristic_value()
-        f2 = other.depth + other.give_heuristic_value()
+        f1 = self.depth + self.heuristic()
+        f2 = other.depth + other.heuristic()
         return f1 < f2
 
     def adjacents(self):
@@ -61,7 +62,6 @@ class Node:
     # But for Part A, we win if and only if the lower player has 0 tokens left
     def won_state(self):
         return len(self.get_enemy_pieces()) == 0
-
 
     # Calculates the manhattan distance from two tiles on the hexagonal board
     def distance(self, coord1, coord2):
@@ -110,9 +110,9 @@ class Node:
                 points.append(key)
         # Do all possible pairings
         if(len(points) >= len(piece_tiles)):
-            combinations = [list(zip(x,piece_tiles)) for x in itertools.permutations(points,len(piece_tiles))]
+            combinations = [list(zip(x,piece_tiles)) for x in permutations(points,len(piece_tiles))]
         else:
-            combinations = [list(zip(x,points)) for x in itertools.permutations(piece_tiles,len(points))]
+            combinations = [list(zip(x,points)) for x in permutations(piece_tiles,len(points))]
 
         return combinations
 
@@ -131,7 +131,6 @@ class Node:
                 mindist = total
         return mindist
 
-
     # Heuristic of computing the smallest sum of all pairs given by give_shortest_dist_pairings
     def give_heuristic_value2(self):
         total_heuristic = 0
@@ -146,3 +145,37 @@ class Node:
             total_heuristic += self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles))
 
         return total_heuristic
+
+    ##################################### HEURISTIC 3 WORK #####################################
+
+    # Gets upper and lower token matchings such that the lower pieces that
+    # be captured by a given piece are grouped with that upper piece
+    def matchings(self):
+        # Iterates through lower pieces
+        matches = {}
+        for key, value in self.boardstate.items():
+            if value.islower():
+                closest_threat = None
+                mindist = BIGDIST
+                # Matches lowers pieces to the nearest upper piece that can capture
+                # it. Stores the distance
+                for key1, value1 in self.boardstate.items():
+                    if value1 in COUNTER and COUNTER[value1] == value:
+                        distance = self.distance(key, key1)
+                        if distance  < mindist:
+                            closest_threat = key1
+                            mindist = distance
+                #Distance is stores in a dictionary
+                if closest_threat in matches:
+                    matches[closest_threat].append(mindist)
+                else:
+                    matches[closest_threat] = [mindist]
+        return matches
+
+    # Heuristic for traversing graph
+    def heuristic(self):
+        # Gets the maximum distance needed to be travelled by a signle piece
+        distances = [max(dist_list) for dist_list in self.matchings().values()]
+        if distances:
+            return max(distances)
+        return 0
