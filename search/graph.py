@@ -63,8 +63,6 @@ class Node:
     def won_state(self):
         return len(self.get_enemy_pieces()) == 0
 
-
-
     # Calculates the manhattan distance from two tiles on the hexagonal board
     def distance(self, coord1, coord2):
         (r1, c1) = coord1
