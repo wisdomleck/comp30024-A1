@@ -74,7 +74,7 @@ class Node:
             return abs(dr + dc)
         else:
             return max(abs(dr), abs(dc))
-            
+
     ##################################### HEURISTIC 1 WORK #####################################
     # TEST
     # calculate the minimum distance from an instance of piece to its closest piece it can eat
@@ -134,6 +134,9 @@ class Node:
 
     # Heuristic of computing the smallest sum of all pairs given by give_shortest_dist_pairings
     def give_heuristic_value2(self):
+        # Divide by number of terms to make heuristic admissable?
+        terms = 0
+
         total_heuristic = 0
         for piece in ALLIED_PIECES:
             piece_tiles = []
@@ -144,8 +147,9 @@ class Node:
                     piece_tiles.append(key)
 
             total_heuristic += self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles))
+            terms += 1
 
-        return total_heuristic
+        return total_heuristic/terms
 
     ##################################### HEURISTIC 3 WORK #####################################
 
