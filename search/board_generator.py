@@ -2,11 +2,12 @@ from itertools import product
 
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
 boards_made = []
+boards_considered = [0]
 # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
 # We greedily assume that there will never be two pieces of different type on the same tile
 # If we have two of the same piece on the same tile, should work fine
 def apply_turn(node, moves):
-
+    boards_considered[0] += 1
     # Invalidates boards where upper pieces move on to the same tile
     if len(set([move[1] for move in moves])) < len(moves):
         return False
@@ -27,6 +28,8 @@ def apply_turn(node, moves):
     #is weakly inferior (at most as optimal)
     if new_board in boards_made:
         return False
+
+
     boards_made.append(new_board)
     return new_board
 
@@ -63,7 +66,6 @@ def generate_adjacents(node):
         if new_board:
             adjacent_nodes.append(new_board)
 
-    return adjacent_nodes
 
 def get_swing_moves(position, slide_moves):
     """

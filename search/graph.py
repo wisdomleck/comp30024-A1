@@ -57,6 +57,9 @@ class Node:
     def enemy_pieces_left(self):
         return len(self.get_enemy_pieces())
 
+    def generate_new_node(self, boardstate, depth):
+        newnode = Node(boardstate, depth)
+        return newnode
     # Returns whether the game is in a won state given by the rules
     # Won state if the other player has 0 tokens, or if we have invincible token and other player has 1 token not invincible
     # But for Part A, we win if and only if the lower player has 0 tokens left
@@ -124,20 +127,21 @@ class Node:
             total = 0
 
             # calculate total distance of given combinatino of pairs
+            max_dist = 0
             for pair in list:
                 dist = self.distance(pair[0], pair[1])
-                total += dist
+                if dist > max_dist:
+                    max_dist = dist
 
-            if total < mindist:
-                mindist = total
+            if max_dist < mindist:
+                mindist = max_dist
         return mindist
+
 
     # Heuristic of computing the smallest sum of all pairs given by give_shortest_dist_pairings
     def give_heuristic_value2(self):
         # Divide by number of terms to make heuristic admissable?
-        terms = 0
-
-        total_heuristic = 0
+        max_dist = 0
         for piece in ALLIED_PIECES:
             piece_tiles = []
 
@@ -146,10 +150,11 @@ class Node:
                 if value == piece:
                     piece_tiles.append(key)
 
-            total_heuristic += self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles))
-            terms += 1
+            heuristic = self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles))
+            if heuristic > max_dist:
+                max_dist = heuristic
 
-        return total_heuristic/terms
+        return max_dist
 
     ##################################### HEURISTIC 3 WORK #####################################
 
@@ -184,3 +189,19 @@ class Node:
         if distances:
             return max(distances)
         return 0
+
+    def give_heuristic_value4(self):
+        # Divide by number of terms to make heuristic admissable?
+        distances = []
+        total_heuristic = 0
+        for piece in ALLIED_PIECES:
+            piece_tiles = []
+
+            # Get the tile coords of the allied piece type
+            for key, value in (self.boardstate).items():
+                if value == piece:
+                    piece_tiles.append(key)
+
+            distances.append(self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles)))
+
+        return max(distances)

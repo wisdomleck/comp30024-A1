@@ -15,6 +15,7 @@ import json
 from search.util import print_board, print_slide, print_swing, reformat_board, matchups, game_over
 from search.graph import Node, Graph
 from search.search import  iterative_depth_search, a_star
+from search.board_generator import boards_made, boards_considered
 
 def main():
     try:
@@ -27,7 +28,7 @@ def main():
     # TEST IF BOARD MOVE WORKS
     firstNode = Node(reformat_board(data), 0)
     graph = Graph(firstNode)
-    
+
     #solution_states = iterative_depth_search(graph)
     #for state in solution_states:
     #    print_board(state.boardstate)
@@ -42,8 +43,10 @@ def main():
         path.insert(0,solution)
         solution = solution.predecessor
     for node in path:
-        #print(node.give_heuristic_value())
+        print(node.give_heuristic_value2())
         print_board(node.boardstate)
+
+    print(f"boards considered: {boards_considered[0]}, boards made = {len(boards_made)}")
 
     #print_board(firstNode.boardstate)
     #print("heuristic:", firstNode.give_heuristic_value())
