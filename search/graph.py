@@ -2,7 +2,7 @@
 as a set of states/nodes in a graph. Some definitions here are useful to represent
 possible coordinates on the board, or possible moves """
 
-from search.board_generator import generate_adjacents
+from search.board_generator import generate_adjacents, initialise_board, distance
 from itertools import permutations
 
 # Uninitialised value for distance in heuristic
@@ -13,10 +13,9 @@ ALLIED_PIECES = ["R", "S", "P"]
 """ Initialise a graph by passing in a root node. This node then
 will store edges out to other nodes """
 class Graph:
-    def __init__(self, initial_state):
-        self.initial_state = initial_state
     def __init__(self, root):
         self.root = root
+        initialise_board(root.boardstate)
 
 
 """ Node in a graph to represent the current board state. Might need to update later with
@@ -67,7 +66,7 @@ class Node:
         return len(self.get_enemy_pieces()) == 0
 
     # Calculates the manhattan distance from two tiles on the hexagonal board
-    def distance(self, coord1, coord2):
+    """def distance(self, coord1, coord2):
         (r1, c1) = coord1
         (r2, c2) = coord2
 
@@ -76,85 +75,7 @@ class Node:
         if (dr < 0 and dc < 0) or (dr > 0 and dc > 0):
             return abs(dr + dc)
         else:
-            return max(abs(dr), abs(dc))
-
-    ##################################### HEURISTIC 1 WORK #####################################
-    # TEST
-    # calculate the minimum distance from an instance of piece to its closest piece it can eat
-    def min_distance(self, coord, piece_type):
-        mindist = BIGDIST
-        for key, value in (self.boardstate).items():
-            if value == COUNTER[piece_type]:
-                if self.distance(coord, key) < mindist:
-                    mindist = self.distance(coord, key)
-        return mindist
-
-    # test this
-    def give_heuristic_value(self):
-        heuristic = 0
-        # for each allied piece, calculate the min distance to each piece it can eat. if not there, then assign 0
-        for key, value in (self.boardstate).items():
-            if value in ALLIED_PIECES:
-                if COUNTER[value] in self.get_enemy_pieces():
-                    heuristic += self.min_distance(key, value)
-                else:
-                    continue
-        return heuristic
-
-    ##################################### HEURISTIC 2 WORK #####################################
-    # Gives the best pairing for pieces on the board for a given allied piece type
-    # get piece_type and tiles
-    # find the shortest distance from piece_tiles to each counter piece_tile
-    # add up distances
-    def give_pairings_combos(self, piece_type, piece_tiles):
-        points = []
-        # get all the counter points
-        for key, value in (self.boardstate).items():
-            if value == COUNTER[piece_type]:
-                points.append(key)
-        # Do all possible pairings
-        if(len(points) >= len(piece_tiles)):
-            combinations = [list(zip(x,piece_tiles)) for x in permutations(points,len(piece_tiles))]
-        else:
-            combinations = [list(zip(x,points)) for x in permutations(piece_tiles,len(points))]
-
-        return combinations
-
-    # Find the minimum distance pairings
-    def get_min_value_pairings(self, combinations):
-        mindist = 100000 # arbitrary
-        for list in combinations:
-            total = 0
-
-            # calculate total distance of given combinatino of pairs
-            max_dist = 0
-            for pair in list:
-                dist = self.distance(pair[0], pair[1])
-                if dist > max_dist:
-                    max_dist = dist
-
-            if max_dist < mindist:
-                mindist = max_dist
-        return mindist
-
-
-    # Heuristic of computing the smallest sum of all pairs given by give_shortest_dist_pairings
-    def give_heuristic_value2(self):
-        # Divide by number of terms to make heuristic admissable?
-        max_dist = 0
-        for piece in ALLIED_PIECES:
-            piece_tiles = []
-
-            # Get the tile coords of the allied piece type
-            for key, value in (self.boardstate).items():
-                if value == piece:
-                    piece_tiles.append(key)
-
-            heuristic = self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles))
-            if heuristic > max_dist:
-                max_dist = heuristic
-
-        return max_dist
+            return max(abs(dr), abs(dc))"""
 
     ##################################### HEURISTIC 3 WORK #####################################
 
@@ -171,10 +92,10 @@ class Node:
                 # it. Stores the distance
                 for key1, value1 in self.boardstate.items():
                     if value1 in COUNTER and COUNTER[value1] == value:
-                        distance = self.distance(key, key1)
-                        if distance  < mindist:
+                        dist = distance(key, key1)
+                        if dist  < mindist:
                             closest_threat = key1
-                            mindist = distance
+                            mindist = dist
                 #Distance is stores in a dictionary
                 if closest_threat in matches:
                     matches[closest_threat].append(mindist)
@@ -189,19 +110,3 @@ class Node:
         if distances:
             return max(distances)
         return 0
-
-    def give_heuristic_value4(self):
-        # Divide by number of terms to make heuristic admissable?
-        distances = []
-        total_heuristic = 0
-        for piece in ALLIED_PIECES:
-            piece_tiles = []
-
-            # Get the tile coords of the allied piece type
-            for key, value in (self.boardstate).items():
-                if value == piece:
-                    piece_tiles.append(key)
-
-            distances.append(self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles)))
-
-        return max(distances)

@@ -35,15 +35,16 @@ def main():
 
     #print_board(firstNode.boardstate)
     #print("heuristic1:", firstNode.give_heuristic_value())
-    #print("heuristic2:", firstNode.give_heuristic_value2())
-
+    #print("heuristic2:", firstNode.give_heuristic_value2()
+    #print_board(firstNode.boardstate)
+    #print(firstNode.give_heuristic_value2())
     solution = a_star(graph)
     path = []
     while solution:
         path.insert(0,solution)
         solution = solution.predecessor
     for node in path:
-        print(node.give_heuristic_value2())
+        print(node.heuristic())
         print_board(node.boardstate)
 
     print(f"boards considered: {boards_considered[0]}, boards made = {len(boards_made)}")

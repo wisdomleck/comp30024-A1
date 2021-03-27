@@ -1,4 +1,5 @@
 from itertools import product
+from queue import Queue
 
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
 boards_made = []
@@ -59,13 +60,13 @@ def generate_adjacents(node):
         moves_list.append([(curr, new) for new in news])
 
     # Get all combinations of moves and for each combo construct a new board state
-    adjacent_nodes = []
+    adjacent_states = []
     turns = list(product(*moves_list))
     for turn in turns:
         new_board = apply_turn(node, turn)
         if new_board:
-            adjacent_nodes.append(new_board)
-
+            adjacent_states.append(new_board)
+    return adjacent_states
 
 def get_swing_moves(position, slide_moves):
     """
@@ -93,3 +94,23 @@ def get_slide_moves(position, board):
     return [(r+i, q+j) for i in [-1,0,1] for j in [-1,0,1]
             if i != j and r+i in ran and q+j in ran and \
             -(r+i)-(q+j) in ran and (r+i, q+j) not in blocks]
+
+board_graph = {}
+def initialise_board(board):
+    for r in range(-4,5):
+        for q in range(-4,5):
+            if -r-q in range(-4,5):
+                board_graph[(r,q)] = get_slide_moves((r,q), board)
+
+def distance(p1, p2):
+    Q = Queue()
+    Q.put((p1, 0))
+    explored = []
+    while True:
+        tile, cost = Q.get()
+        for adj_tile in board_graph[tile]:
+            if adj_tile == p2:
+                return cost + 1
+            if adj_tile not in explored:
+                explored.append(adj_tile)
+                Q.put((adj_tile, cost + 1))
