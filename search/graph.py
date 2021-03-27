@@ -4,7 +4,7 @@ possible coordinates on the board, or possible moves """
 
 from search.board_generator import generate_adjacents, initialise_board, distance
 from itertools import permutations
-
+from math import ceil
 # Uninitialised value for distance in heuristic
 BIGDIST = 1000000
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
@@ -31,8 +31,8 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 = self.depth + self.heuristic()
-        f2 = other.depth + other.heuristic()
+        f1 = self.depth + self.give_heuristic_value5()
+        f2 = other.depth + other.give_heuristic_value5()
         return f1 < f2
 
     def adjacents(self):
@@ -110,3 +110,73 @@ class Node:
         if distances:
             return max(distances)
         return 0
+ 
+    def give_heuristic_value4(self):
+        # Divide by number of terms to make heuristic admissable?
+        distances = []
+        total_heuristic = 0
+        for piece in ALLIED_PIECES:
+            piece_tiles = []
+
+            # Get the tile coords of the allied piece type
+            for key, value in (self.boardstate).items():
+                if value == piece:
+                    piece_tiles.append(key)
+
+            distances.append(self.get_min_value_pairings(self.give_pairings_combos(piece, piece_tiles)))
+
+        return max(distances)
+
+        ##################################### HEURISTIC 5 WORK #####################################
+    def give_heuristic_value5(self):
+        # Find the shortest distance between enemy pieces + shortest distance of an allied piece to enemy piece
+        piece_heuristics = []
+        # Find the shortest path to each piece
+        for piece in ALLIED_PIECES:
+            mindist = 10000;
+            # Find tiles of enemies
+            enemy_tiles = []
+            for key, value in self.boardstate.items():
+                if value == COUNTER[piece]:
+                    enemy_tiles.append(key)
+
+            # Generate all permutations, find the minimum distance pathway through them
+            # If no enemy tiles, then go to next piece
+            if len(enemy_tiles) == 0:
+                continue
+
+            perms = list(permutations(enemy_tiles))
+            for path in perms:
+                dist = 0
+                #print(path)
+                for i in range(len(path)-1):
+                    dist += self.distance(path[i], path[i+1])
+                if dist < mindist:
+                    mindist = dist
+
+            # Now for the same piece, find the min dist to an enemy piece
+            mindistpiece = 100000
+            distpiece = 0
+            for key, value in self.boardstate.items():
+                if value == piece:
+                    distpiece = self.min_distance(key, piece)
+                    if distpiece < mindistpiece:
+                        mindistpiece = distpiece
+
+            # Get number of pieces of the current piece_type
+            counter = 0
+            for key, value in self.boardstate.items():
+                if value == piece:
+                    counter += 1
+
+            # If we don't have any of the current allied piece, don't add to heuristic
+            if counter == 0:
+                continue
+
+            piece_heuristics.append(ceil((mindist + mindistpiece)/counter))
+
+
+        if len(piece_heuristics) == 0:
+            return 0
+
+        return max(piece_heuristics)
