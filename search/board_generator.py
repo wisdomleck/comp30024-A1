@@ -66,6 +66,7 @@ def generate_adjacents(node):
         if new_board:
             adjacent_nodes.append(new_board)
 
+    return adjacent_nodes
 
 def get_swing_moves(position, slide_moves):
     """
