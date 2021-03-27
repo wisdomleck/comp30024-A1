@@ -4,7 +4,7 @@ possible coordinates on the board, or possible moves """
 
 from search.board_generator import generate_adjacents
 from itertools import permutations
-
+from math import ceil
 # Uninitialised value for distance in heuristic
 BIGDIST = 1000000
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
@@ -234,15 +234,26 @@ class Node:
                     mindist = dist
 
             # Now for the same piece, find the min dist to an enemy piece
-            mindistpiece = 10000;
-            distpiece = 0;
+            mindistpiece = 100000
+            distpiece = 0
             for key, value in self.boardstate.items():
                 if value == piece:
                     distpiece = self.min_distance(key, piece)
                     if distpiece < mindistpiece:
                         mindistpiece = distpiece
 
-            piece_heuristics.append(mindist + mindistpiece)
+            # Get number of pieces of the current piece_type
+            counter = 0
+            for key, value in self.boardstate.items():
+                if value == piece:
+                    counter += 1
+
+            # If we don't have any of the current allied piece, don't add to heuristic
+            if counter == 0:
+                continue
+
+            piece_heuristics.append(ceil((mindist + mindistpiece)/counter))
+
 
         if len(piece_heuristics) == 0:
             return 0
