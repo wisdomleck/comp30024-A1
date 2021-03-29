@@ -10,19 +10,21 @@ boards_considered = [0]
 def apply_turn(node, moves):
     boards_considered[0] += 1
     # Invalidates boards where upper pieces move on to the same tile
-    if len(set([move[1] for move in moves])) < len(moves):
+    new_positions = [move[1] for move in moves]
+    if len(set(new_positions)) < len(moves):
         return False
 
     new_board = node.boardstate.copy()
     for curr_pos, new_pos in moves:
-        piece = new_board[curr_pos]
+        piece = node.boardstate[curr_pos]
 
         # Invalidates boards where an upper piece destroys itself
-        if new_pos in new_board and new_board[new_pos].islower() and \
+        if new_pos in new_board and node.boardstate[new_pos].islower() and \
         new_board[new_pos] != COUNTER[piece]:
             return False
 
-        del new_board[curr_pos]
+        if curr_pos not in new_positions:
+            del new_board[curr_pos]
         new_board[new_pos] = piece
 
     #Invalidates boards that have already been created since revisiting the board
@@ -62,12 +64,20 @@ def generate_adjacents(node):
     # Get all combinations of moves and for each combo construct a new board state
     adjacent_states = []
     turns = list(product(*moves_list))
+
     for turn in turns:
         new_board = apply_turn(node, turn)
         if new_board:
-            adjacent_states.append(new_board)
+            adjacent_states.append((turn, new_board))
     return adjacent_states
 
+"""
+def arbitrary_move(node, moves):
+    for move in moves:
+        for key, value in node.boardstate.items():
+            if value.isupper() and value != "B" or value.islower():
+                if all([node.distance(move[1], key) >= move[0]])
+"""
 def get_swing_moves(position, slide_moves):
     """
     Given a current position and a dictionary of slide moves, if the current
@@ -78,9 +88,34 @@ def get_swing_moves(position, slide_moves):
     swing_moves = []
     for move_list in slide_moves.values():
         if position in move_list:
-            move_list.remove(position)
-            swing_moves = swing_moves + move_list
+            swing_moves += can_swing_to(position, move_list)
     return swing_moves
+
+def can_swing_to(mover, positions):
+    clusters = []
+    positions_copy = positions.copy()
+    while positions_copy:
+        prev_cluster = [positions_copy.pop()]
+        new_cluster = clustering(prev_cluster, positions_copy)
+        while len(prev_cluster) < len(new_cluster):
+            positions_copy = list(set(positions_copy).difference(set(new_cluster)))
+            prev_cluster = new_cluster
+            new_cluster = clustering(prev_cluster, positions_copy)
+        clusters.append(new_cluster)
+
+    for cluster in clusters:
+        if mover in cluster:
+            cluster.remove(mover)
+            return cluster
+    return []
+
+def clustering(cluster, positions):
+    cluster_copy = cluster.copy()
+    for p in cluster:
+        for q in positions:
+            if q in get_adjacents(p):
+                cluster_copy.append(q)
+    return cluster_copy
 
 def get_slide_moves(position, board):
     """
@@ -89,28 +124,12 @@ def get_slide_moves(position, board):
     onto a block
     """
     r,q = position
-    blocks = [rq for rq in board if board[rq] == "B"]
+    blocks = [p for p in board if board[p] == "B"]
+    ran = range(-4,5)
+    return [p for p in get_adjacents(position) if p not in blocks]
+
+def get_adjacents(position):
+    r,q = position
     ran = range(-4,5)
     return [(r+i, q+j) for i in [-1,0,1] for j in [-1,0,1]
-            if i != j and r+i in ran and q+j in ran and \
-            -(r+i)-(q+j) in ran and (r+i, q+j) not in blocks]
-
-board_graph = {}
-def initialise_board(board):
-    for r in range(-4,5):
-        for q in range(-4,5):
-            if -r-q in range(-4,5):
-                board_graph[(r,q)] = get_slide_moves((r,q), board)
-
-def distance(p1, p2):
-    Q = Queue()
-    Q.put((p1, 0))
-    explored = []
-    while True:
-        tile, cost = Q.get()
-        for adj_tile in board_graph[tile]:
-            if adj_tile == p2:
-                return cost + 1
-            if adj_tile not in explored:
-                explored.append(adj_tile)
-                Q.put((adj_tile, cost + 1))
+            if i != j and r+i in ran and q+j in ran and -(r+i)-(q+j) in ran]

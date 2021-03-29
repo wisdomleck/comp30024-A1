@@ -12,10 +12,10 @@ import json
 # If you want to separate your code into separate files, put them
 # inside the `search` directory (like this one and `util.py`) and
 # then import from them like this:
-from search.util import print_board, print_slide, print_swing, reformat_board, matchups, game_over
+from search.util import print_board, print_slide, print_swing, reformat_board
 from search.graph import Node, Graph
-from search.search import  iterative_depth_search, a_star
-from search.board_generator import boards_made, boards_considered
+from search.search import a_star
+from search.board_generator import boards_made, boards_considered, generate_adjacents
 
 def main():
     try:
@@ -26,32 +26,25 @@ def main():
         sys.exit(1)
 
     # TEST IF BOARD MOVE WORKS
-    firstNode = Node(reformat_board(data), 0)
+    firstNode = Node(reformat_board(data), 0, [])
     graph = Graph(firstNode)
-
-    #solution_states = iterative_depth_search(graph)
-    #for state in solution_states:
-    #    print_board(state.boardstate)
-
-    #print_board(firstNode.boardstate)
-    #print("heuristic1:", firstNode.give_heuristic_value())
-    #print("heuristic2:", firstNode.give_heuristic_value2())
     print_board(firstNode.boardstate)
-    print("HEURISTIC 5: ", firstNode.give_heuristic_value5())
+
     solution = a_star(graph)
-    #solution = None
     path = []
     while solution:
         path.insert(0,solution)
         solution = solution.predecessor
+
     for node in path:
-        print(node.heuristic())
         print_board(node.boardstate)
+        for p, q in node.moveset:
+            if node.distance(p, q) == 1:
+                print_slide(node.depth, p[0], p[1], q[0], q[1])
+            elif node.distance(p,q) == 2:
+                print_swing(node.depth, p[0], p[1], q[0], q[1])
 
     print(f"boards considered: {boards_considered[0]}, boards made = {len(boards_made)}")
-
-    #print_board(firstNode.boardstate)
-    #print("heuristic:", firstNode.give_heuristic_value())
 
     # TODO:
     # Find and print a solution to the board configuration described
