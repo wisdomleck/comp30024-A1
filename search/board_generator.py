@@ -2,8 +2,10 @@ from itertools import product
 from queue import Queue
 
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
+ALLIED_PIECES = ["R", "P", "S"]
 boards_made = []
 boards_considered = [0]
+tiles_visited = []
 # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
 # We greedily assume that there will never be two pieces of different type on the same tile
 # If we have two of the same piece on the same tile, should work fine
@@ -31,6 +33,33 @@ def apply_turn(node, moves):
     #is weakly inferior (at most as optimal)
     if new_board in boards_made:
         return False
+
+
+
+    #Invalidates boards where pieces have gone to the same tile before
+    # Represented as a (piece, (tilecoords), num_enemy_pieces)
+    for key, value in new_board.items():
+        if value in ALLIED_PIECES:
+            # get num enemy pieces
+            num_enemy_pieces = 0
+            for key2, value2 in new_board.items():
+                if value2 == COUNTER[value]:
+                    num_enemy_pieces += 1
+            if (value, key, num_enemy_pieces) in tiles_visited:
+                return False
+                print(value, key, num_enemy_pieces)
+
+
+
+    # Else is a legit board, add new tiles into tile_visited
+    for key, value in new_board.items():
+        if value in ALLIED_PIECES:
+            # get num enemy pieces
+            num_enemy_pieces = 0
+            for key2, value2 in new_board.items():
+                if value2 == COUNTER[value]:
+                    num_enemy_pieces += 1
+            tiles_visited.append((value, key, num_enemy_pieces))
 
 
     boards_made.append(new_board)
