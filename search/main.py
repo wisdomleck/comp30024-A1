@@ -32,7 +32,7 @@ def main():
     #generate_adjacents(firstNode)
 
 
-    #solution = None
+    solution = None
     solution = a_star(graph)
     path = []
     while solution:
@@ -50,7 +50,7 @@ def main():
 
     print(f"boards considered: {boards_considered[0]}, boards made = {len(boards_made)}")
 
-    print("MINDIST TOTAL: ", firstNode.get_min_distances())
+    print("TOTALDIST: ", firstNode.dist_to_blocks())
 
     # TODO:
     # Find and print a solution to the board configuration described

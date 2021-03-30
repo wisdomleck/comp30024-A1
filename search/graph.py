@@ -31,8 +31,8 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 =  self.get_min_distances() + 10*self.enemy_pieces_left()
-        f2 =  other.get_min_distances() + 10*other.enemy_pieces_left()
+        f1 =  self.get_min_distances() + 10*self.enemy_pieces_left() - 0.33*self.dist_to_blocks()
+        f2 =  other.get_min_distances() + 10*other.enemy_pieces_left() - 0.33*other.dist_to_blocks()
         return f1 < f2
 
     def adjacents(self):
@@ -132,7 +132,7 @@ class Node:
         if len(piece_heuristics) == 0:
             return 0
 
-        return sum(piece_heuristics)
+        return max(piece_heuristics)
 
 
     ###################################################################################################################################
@@ -158,3 +158,65 @@ class Node:
             mindist_total += mindist
 
         return mindist_total
+
+
+    ##### STill got some tiebreaks that don't make sense
+    def get_dist_to_all_enemies(self):
+        allied_piece_tiles = []
+        #get coords of allied pieces
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                allied_piece_tiles.append(key)
+
+        totaldist = 0
+        for tile in allied_piece_tiles:
+            if COUNTER[self.boardstate[tile]] in self.boardstate.values():
+                # then we have an enemy piece
+                for key, value in self.boardstate.items():
+                    if value == COUNTER[self.boardstate[tile]]:
+                        dist = self.distance(key, tile)
+                        totaldist += dist
+
+        if totaldist == 0:
+            return 0
+        else:
+            return 1/totaldist
+
+
+    ##### STill got some tiebreaks that don't make sense
+    ## reward allies to stay close to eachother when tiebreaking?
+    def get_dist_to_all_allies(self):
+        allied_piece_tiles = []
+        #get coords of allied pieces
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                allied_piece_tiles.append(key)
+
+        totaldist = 0
+
+        for i in range(len(allied_piece_tiles)-1):
+            totaldist += self.distance(allied_piece_tiles[i], allied_piece_tiles[i+1])
+
+
+        if totaldist == 0:
+            return 0
+        else:
+            return 1/totaldist
+
+    # We want to be near as many adjacent blocks?
+    def dist_to_blocks(self):
+        allied_piece_tiles = []
+        block_piece_tiles = []
+        #get coords of allied pieces
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                allied_piece_tiles.append(key)
+            if value == 'B':
+                block_piece_tiles.append(key)
+
+        score = 0
+        for ally in allied_piece_tiles:
+            for block in block_piece_tiles:
+                if self.distance(ally, block) == 1:
+                    score += 1
+        return score
