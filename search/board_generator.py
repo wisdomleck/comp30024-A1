@@ -5,7 +5,6 @@ COUNTER = {"R" : "s", "P": "r", "S": "p"}
 ALLIED_PIECES = ["R", "P", "S"]
 boards_made = []
 boards_considered = [0]
-tiles_visited = []
 # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
 # We greedily assume that there will never be two pieces of different type on the same tile
 # If we have two of the same piece on the same tile, should work fine
@@ -34,34 +33,7 @@ def apply_turn(node, moves):
     if new_board in boards_made:
         return False
 
-
-
-    #Invalidates boards where pieces have gone to the same tile before
-    # Represented as a (piece, (tilecoords), num_enemy_pieces)
-    for key, value in new_board.items():
-        if value in ALLIED_PIECES:
-            # get num enemy pieces
-            num_enemy_pieces = 0
-            for key2, value2 in new_board.items():
-                if value2 == COUNTER[value]:
-                    num_enemy_pieces += 1
-            if (value, key, num_enemy_pieces) in tiles_visited:
-                return False
-                print(value, key, num_enemy_pieces)
-
-
-
-    # Else is a legit board, add new tiles into tile_visited
-    for key, value in new_board.items():
-        if value in ALLIED_PIECES:
-            # get num enemy pieces
-            num_enemy_pieces = 0
-            for key2, value2 in new_board.items():
-                if value2 == COUNTER[value]:
-                    num_enemy_pieces += 1
-            tiles_visited.append((value, key, num_enemy_pieces))
-
-
+    #print(tiles_visited)
     boards_made.append(new_board)
     return new_board
 
@@ -98,6 +70,7 @@ def generate_adjacents(node):
         new_board = apply_turn(node, turn)
         if new_board:
             adjacent_states.append((turn, new_board))
+    #print(len(adjacent_states))
     return adjacent_states
 
 """
@@ -122,14 +95,17 @@ def get_swing_moves(position, slide_moves):
 
 def can_swing_to(mover, positions):
     clusters = []
-    positions_copy = positions.copy()
-    while positions_copy:
-        prev_cluster = [positions_copy.pop()]
-        new_cluster = clustering(prev_cluster, positions_copy)
+    valid_swings = positions.copy()\
+
+    while valid_swings:
+        prev_cluster = [valid_swings.pop()]
+        new_cluster = clustering(prev_cluster, valid_swings)
+
         while len(prev_cluster) < len(new_cluster):
-            positions_copy = list(set(positions_copy).difference(set(new_cluster)))
+            valid_swings = list(set(valid_swings).difference(set(new_cluster)))
             prev_cluster = new_cluster
-            new_cluster = clustering(prev_cluster, positions_copy)
+            new_cluster = clustering(prev_cluster, valid_swings)
+
         clusters.append(new_cluster)
 
     for cluster in clusters:

@@ -11,6 +11,7 @@ def a_star(graph):
         for node in best_node.adjacents():
             node.predecessor = best_node
             heapq.heappush(Q, node)
+            #print(len(Q))
 
 
 def iterative_depth_search(graph):

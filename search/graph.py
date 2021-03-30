@@ -31,9 +31,9 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 = self.depth + self.give_heuristic_value5()
-        f2 = other.depth + other.give_heuristic_value5()
-        return (f1, -self.depth) < (f2, other.depth)
+        f1 = self.depth + self.heuristic()
+        f2 = other.depth + other.heuristic()
+        return f1 < f2
 
     def adjacents(self):
         boards = generate_adjacents(self)
@@ -78,7 +78,7 @@ class Node:
             return max(abs(dr), abs(dc))
 
 
-    def give_heuristic_value5(self):
+    def heuristic(self):
         # Find the shortest distance between enemy pieces + shortest distance of an allied piece to enemy piece
         piece_heuristics = []
         # Find the shortest path to each piece
@@ -97,7 +97,7 @@ class Node:
             if len(enemy_tiles) == 0:
                 continue
 
-            mindist = 10000;
+            mindist = 1000;
             for ally in ally_tiles:
                 perms = list(permutations(enemy_tiles))
                 for path in perms:
