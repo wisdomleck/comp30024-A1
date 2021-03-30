@@ -31,8 +31,8 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 = self.depth + 2*self.heuristic()
-        f2 = self.depth + 2*other.heuristic()
+        f1 =  self.heuristic()
+        f2 =  other.heuristic()
         return f1 < f2
 
     def adjacents(self):
@@ -127,10 +127,8 @@ class Node:
                     if dist < mindist:
                         mindist = dist
 
-            piece_heuristics.append(ceil((mindist)/len(ally_tiles)))
-
-
+            piece_heuristics.append((mindist))
         if len(piece_heuristics) == 0:
             return 0
 
-        return max(piece_heuristics) #- 1/self.board_score()
+        return sum(piece_heuristics)
