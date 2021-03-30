@@ -30,6 +30,9 @@ def main():
     graph = Graph(firstNode)
     print_board(firstNode.boardstate)
     #generate_adjacents(firstNode)
+
+
+    #solution = None
     solution = a_star(graph)
     path = []
     while solution:
@@ -46,6 +49,8 @@ def main():
                 print_swing(node.depth, p[0], p[1], q[0], q[1])
 
     print(f"boards considered: {boards_considered[0]}, boards made = {len(boards_made)}")
+
+    print("MINDIST TOTAL: ", firstNode.get_min_distances())
 
     # TODO:
     # Find and print a solution to the board configuration described
