@@ -95,7 +95,6 @@ class Node:
         else:
             return max(abs(dr), abs(dc))
 
-
     def heuristic(self):
         # Find the shortest distance between enemy pieces + shortest distance of an allied piece to enemy piece
         piece_heuristics = []
