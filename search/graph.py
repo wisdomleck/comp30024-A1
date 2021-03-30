@@ -31,8 +31,8 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 = self.depth + self.heuristic()
-        f2 = other.depth + other.heuristic()
+        f1 = self.depth + 2*self.heuristic()
+        f2 = self.depth + 2*other.heuristic()
         return f1 < f2
 
     def adjacents(self):
@@ -66,6 +66,24 @@ class Node:
         return len(self.get_enemy_pieces()) == 0
 
     # Calculates the manhattan distance from two tiles on the hexagonal board
+    def board_score(self):
+        ally_dist_sum = 0
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                for key1, value1 in self.boardstate.items():
+                    if value1 in ALLIED_PIECES:
+                        ally_dist_sum += self.distance(key, key1)
+
+        ally_dist_sum /= 2
+        enemy_dist_sum = 0
+        for key,value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                for key1, value1 in self.boardstate.items():
+                    if COUNTER[value] == value1:
+                        enemy_dist_sum += self.distance(key, key1)
+
+        return ally_dist_sum + enemy_dist_sum
+
     def distance(self, coord1, coord2):
         (r1, c1) = coord1
         (r2, c2) = coord2
@@ -76,7 +94,6 @@ class Node:
             return abs(dr + dc)
         else:
             return max(abs(dr), abs(dc))
-
 
     def heuristic(self):
         # Find the shortest distance between enemy pieces + shortest distance of an allied piece to enemy piece
@@ -97,7 +114,7 @@ class Node:
             if len(enemy_tiles) == 0:
                 continue
 
-            mindist = 1000;
+            mindist = 10000;
             for ally in ally_tiles:
                 perms = list(permutations(enemy_tiles))
                 for path in perms:
@@ -116,4 +133,4 @@ class Node:
         if len(piece_heuristics) == 0:
             return 0
 
-        return max(piece_heuristics)
+        return max(piece_heuristics) #- 1/self.board_score()

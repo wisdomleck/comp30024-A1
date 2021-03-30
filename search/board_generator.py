@@ -1,10 +1,12 @@
 from itertools import product
 from queue import Queue
+from search.util import print_board
 
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
 ALLIED_PIECES = ["R", "P", "S"]
 boards_made = []
 boards_considered = [0]
+
 # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
 # We greedily assume that there will never be two pieces of different type on the same tile
 # If we have two of the same piece on the same tile, should work fine
@@ -30,12 +32,29 @@ def apply_turn(node, moves):
 
     #Invalidates boards that have already been created since revisiting the board
     #is weakly inferior (at most as optimal)
-    if new_board in boards_made:
-        return False
+    #if new_board in boards_made:
+    #    return False
 
-    #print(tiles_visited)
+    for board in boards_made:
+        if equals(board, new_board):
+            #print_board(board)
+
+            #print_board(new_board)
+            return False
     boards_made.append(new_board)
     return new_board
+
+def equals(board1, board2):
+    rel_pieces = []
+    for key, value in board1.items():
+        if value in COUNTER.keys() and COUNTER[value] in board1.values():
+            rel_pieces.append((key, value))
+
+    num_same = 0
+    for p, q in rel_pieces:
+        if (p,q) in board2.items():
+            num_same += 1
+    return num_same == len(rel_pieces)
 
 def generate_adjacents(node):
     """
@@ -52,6 +71,7 @@ def generate_adjacents(node):
 
     # Append list of swing moves to get all moves
     moves_dict = {}
+    #relevant_pieces = [name ]
     for key in slide_moves:
         all_moves = set(slide_moves[key] + get_swing_moves(key, slide_moves))
         moves_dict[key] = list(all_moves)
@@ -70,16 +90,9 @@ def generate_adjacents(node):
         new_board = apply_turn(node, turn)
         if new_board:
             adjacent_states.append((turn, new_board))
-    #print(len(adjacent_states))
     return adjacent_states
 
-"""
-def arbitrary_move(node, moves):
-    for move in moves:
-        for key, value in node.boardstate.items():
-            if value.isupper() and value != "B" or value.islower():
-                if all([node.distance(move[1], key) >= move[0]])
-"""
+
 def get_swing_moves(position, slide_moves):
     """
     Given a current position and a dictionary of slide moves, if the current
@@ -95,17 +108,14 @@ def get_swing_moves(position, slide_moves):
 
 def can_swing_to(mover, positions):
     clusters = []
-    valid_swings = positions.copy()\
-
-    while valid_swings:
-        prev_cluster = [valid_swings.pop()]
-        new_cluster = clustering(prev_cluster, valid_swings)
-
+    positions_copy = positions.copy()
+    while positions_copy:
+        prev_cluster = [positions_copy.pop()]
+        new_cluster = clustering(prev_cluster, positions_copy)
         while len(prev_cluster) < len(new_cluster):
-            valid_swings = list(set(valid_swings).difference(set(new_cluster)))
+            positions_copy = list(set(positions_copy).difference(set(new_cluster)))
             prev_cluster = new_cluster
-            new_cluster = clustering(prev_cluster, valid_swings)
-
+            new_cluster = clustering(prev_cluster, positions_copy)
         clusters.append(new_cluster)
 
     for cluster in clusters:

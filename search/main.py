@@ -29,7 +29,7 @@ def main():
     firstNode = Node(reformat_board(data), 0, [])
     graph = Graph(firstNode)
     print_board(firstNode.boardstate)
-
+    #generate_adjacents(firstNode)
     solution = a_star(graph)
     path = []
     while solution:
@@ -38,6 +38,7 @@ def main():
 
     for node in path:
         print_board(node.boardstate)
+        print(node.board_score())
         for p, q in node.moveset:
             if node.distance(p, q) == 1:
                 print_slide(node.depth, p[0], p[1], q[0], q[1])

@@ -1,5 +1,5 @@
 import heapq
-
+from search.util import print_board
 def a_star(graph):
     Q = [graph.root]
     heapq.heapify(Q)
@@ -9,9 +9,9 @@ def a_star(graph):
         if best_node.won_state():
             return best_node
         for node in best_node.adjacents():
+            #print_board(node.boardstate)
             node.predecessor = best_node
             heapq.heappush(Q, node)
-            #print(len(Q))
 
 
 def iterative_depth_search(graph):
