@@ -32,27 +32,40 @@ def apply_turn(node, moves):
 
     #Invalidates boards that have already been created since revisiting the board
     #is weakly inferior (at most as optimal)
-    #if new_board in boards_made:
-    #    return False
+    if new_board in boards_made:
+        return False
+
 
     for board in boards_made:
         if equals(board, new_board):
-            #print_board(board)
-
-            #print_board(new_board)
             return False
+
     boards_made.append(new_board)
     return new_board
 
 def equals(board1, board2):
     rel_pieces = []
+    num_enemy_pieces = 0
+    num_enemy_pieces2 = 0
+
+    # get enemy pieces, if changes then free up the tiles
+    for key, value in board1.items():
+        if value in COUNTER.values():
+            num_enemy_pieces += 1
+
     for key, value in board1.items():
         if value in COUNTER.keys() and COUNTER[value] in board1.values():
-            rel_pieces.append((key, value))
+            rel_pieces.append((key, value, num_enemy_pieces))
+
+
+    # get number of enemy pieces in board2
+    for key, value in board2.items():
+        if value in COUNTER.values():
+            num_enemy_pieces2 += 1
 
     num_same = 0
-    for p, q in rel_pieces:
-        if (p,q) in board2.items():
+    for p, q, r in rel_pieces:
+        if (p,q) in board2.items() and r == num_enemy_pieces2:
             num_same += 1
     return num_same == len(rel_pieces)
 
