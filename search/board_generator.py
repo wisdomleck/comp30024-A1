@@ -33,9 +33,6 @@ def apply_turn(node, moves):
         if equals(board, new_board):
             return False
 
-    if new_board in boards_made:
-        return False
-
     boards_made.append(new_board)
     return new_board
 
