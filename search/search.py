@@ -4,12 +4,11 @@ def a_star(graph):
     Q = [graph.root]
     heapq.heapify(Q)
 
-    while True:
+    while Q:
         best_node = heapq.heappop(Q)
         if best_node.won_state():
             return best_node
         for node in best_node.adjacents():
-            #print_board(node.boardstate)
             node.predecessor = best_node
             heapq.heappush(Q, node)
 

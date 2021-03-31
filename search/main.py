@@ -29,6 +29,7 @@ def main():
     firstNode = Node(reformat_board(data), 0, [])
     graph = Graph(firstNode)
     print_board(firstNode.boardstate)
+    print(firstNode.heuristic2())
     #generate_adjacents(firstNode)
     solution = a_star(graph)
     path = []

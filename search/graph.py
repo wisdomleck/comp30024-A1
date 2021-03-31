@@ -31,8 +31,8 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 =  self.heuristic()
-        f2 =  other.heuristic()
+        f1 = self.heuristic2()
+        f2 = other.heuristic2()
         return f1 < f2
 
     def adjacents(self):
@@ -94,6 +94,36 @@ class Node:
             return abs(dr + dc)
         else:
             return max(abs(dr), abs(dc))
+
+    def get_nearest(self, pos, targets):
+        return min([(self.distance(pos, t), t) for t in targets])
+
+    def heuristic2(self):
+        distances = []
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                opponents = [key1 for key1, value1 in self.boardstate.items() if COUNTER[value] == value1]
+                distance = 0
+                if opponents:
+                    distance, tile = self.get_nearest(key, opponents)
+                    opponents.remove(tile)
+                    while opponents:
+                        new_dist, tile = self.get_nearest(tile, opponents)
+                        opponents.remove(tile)
+                        distance += new_dist
+                distances.append((distance,value))
+
+        best_paths = []
+        for piece in ALLIED_PIECES:
+            mindist = BIGDIST
+            token_dists = [dist for dist, token in distances if token == piece]
+            if token_dists:
+                best_paths.append(min(token_dists))
+        if best_paths:
+            return sum(best_paths)
+        else:
+            return 0
+
 
     def heuristic(self):
         # Find the shortest distance between enemy pieces + shortest distance of an allied piece to enemy piece
