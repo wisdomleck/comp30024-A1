@@ -5,7 +5,7 @@ possible coordinates on the board, or possible moves """
 from search.board_generator import generate_adjacents
 from math import ceil
 # Uninitialised value for distance in heuristic
-BIGDIST = 1000000
+BIGDIST = 10000
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
 ALLIED_PIECES = ["R", "S", "P"]
 
@@ -91,7 +91,7 @@ class Node:
         mindist_total = 0
         for tile in allied_piece_tiles:
             if COUNTER[self.boardstate[tile]] in self.boardstate.values():
-                mindist = 100000
+                mindist = BIGDIST
                 # then we have an enemy piece
                 for key, value in self.boardstate.items():
                     if value == COUNTER[self.boardstate[tile]]:

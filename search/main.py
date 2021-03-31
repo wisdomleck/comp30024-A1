@@ -40,10 +40,3 @@ def main():
                 print_slide(node.depth, p[0], p[1], q[0], q[1])
             elif node.distance(p,q) == 2:
                 print_swing(node.depth, p[0], p[1], q[0], q[1])
-
-    # TODO:
-    # Find and print a solution to the board configuration described
-    # by `data`.
-    # Why not start by trying to print this configuration out using the
-    # `print_board` helper function? (See the `util.py` source code for
-    # usage information).
