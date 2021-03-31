@@ -3,7 +3,6 @@ as a set of states/nodes in a graph. Some definitions here are useful to represe
 possible coordinates on the board, or possible moves """
 
 from search.board_generator import generate_adjacents
-from itertools import permutations
 from math import ceil
 # Uninitialised value for distance in heuristic
 BIGDIST = 1000000
@@ -31,9 +30,7 @@ class Node:
         #self.adj_list = []
 
     def __lt__(self, other):
-        f1 = self.heuristic2()
-        f2 = other.heuristic2()
-        return f1 < f2
+        return self.heuristic() < other.heuristic()
 
     def adjacents(self):
         boards = generate_adjacents(self)
@@ -65,25 +62,6 @@ class Node:
     def won_state(self):
         return len(self.get_enemy_pieces()) == 0
 
-    # Calculates the manhattan distance from two tiles on the hexagonal board
-    def board_score(self):
-        ally_dist_sum = 0
-        for key, value in self.boardstate.items():
-            if value in ALLIED_PIECES:
-                for key1, value1 in self.boardstate.items():
-                    if value1 in ALLIED_PIECES:
-                        ally_dist_sum += self.distance(key, key1)
-
-        ally_dist_sum /= 2
-        enemy_dist_sum = 0
-        for key,value in self.boardstate.items():
-            if value in ALLIED_PIECES:
-                for key1, value1 in self.boardstate.items():
-                    if COUNTER[value] == value1:
-                        enemy_dist_sum += self.distance(key, key1)
-
-        return ally_dist_sum + enemy_dist_sum
-
     def distance(self, coord1, coord2):
         (r1, c1) = coord1
         (r2, c2) = coord2
@@ -95,70 +73,52 @@ class Node:
         else:
             return max(abs(dr), abs(dc))
 
-    def get_nearest(self, pos, targets):
-        return min([(self.distance(pos, t), t) for t in targets])
 
-    def heuristic2(self):
-        distances = []
-        for key, value in self.boardstate.items():
-            if value in ALLIED_PIECES:
-                opponents = [key1 for key1, value1 in self.boardstate.items() if COUNTER[value] == value1]
-                distance = 0
-                if opponents:
-                    distance, tile = self.get_nearest(key, opponents)
-                    opponents.remove(tile)
-                    while opponents:
-                        new_dist, tile = self.get_nearest(tile, opponents)
-                        opponents.remove(tile)
-                        distance += new_dist
-                distances.append((distance,value))
-
-        best_paths = []
-        for piece in ALLIED_PIECES:
-            mindist = BIGDIST
-            token_dists = [dist for dist, token in distances if token == piece]
-            if token_dists:
-                best_paths.append(min(token_dists))
-        if best_paths:
-            return sum(best_paths)
-        else:
-            return 0
-
+######################### Heuristic below #####################################
 
     def heuristic(self):
-        # Find the shortest distance between enemy pieces + shortest distance of an allied piece to enemy piece
-        piece_heuristics = []
-        # Find the shortest path to each piece
-        for piece in ALLIED_PIECES:
-            # Find tiles of enemies
-            enemy_tiles = []
-            ally_tiles = []
-            for key, value in self.boardstate.items():
-                if value == piece:
-                    ally_tiles.append(key)
-                if value == COUNTER[piece]:
-                    enemy_tiles.append(key)
+        return self.get_min_distances() + 10*self.enemy_pieces_left() - 0.25*self.dist_to_blocks()
 
-            # Generate all permutations, find the minimum distance pathway through them
-            # If no enemy tiles, then go to next piece
-            if len(enemy_tiles) == 0:
-                continue
+    def get_min_distances(self):
+        allied_piece_tiles = []
+        #get coords of allied pieces
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                allied_piece_tiles.append(key)
 
-            mindist = 10000;
-            for ally in ally_tiles:
-                perms = list(permutations(enemy_tiles))
-                for path in perms:
-                    path = list(path)
-                    path.insert(0, ally)
-                    dist = 0
-                    #print(path)
-                    for i in range(len(path)-1):
-                        dist += self.distance(path[i], path[i+1])
-                    if dist < mindist:
-                        mindist = dist
+        # find mindist of each piece to enemy piece
+        mindist = 0
+        mindist_total = 0
+        for tile in allied_piece_tiles:
+            if COUNTER[self.boardstate[tile]] in self.boardstate.values():
+                mindist = 100000
+                # then we have an enemy piece
+                for key, value in self.boardstate.items():
+                    if value == COUNTER[self.boardstate[tile]]:
+                        dist = self.distance(key, tile)
+                        if dist < mindist:
+                            mindist = dist
+            mindist_total += mindist
 
-            piece_heuristics.append((mindist))
-        if len(piece_heuristics) == 0:
-            return 0
+        return mindist_total
 
-        return sum(piece_heuristics)
+
+
+    # We want to be near as many adjacent blocks?
+    def dist_to_blocks(self):
+        allied_piece_tiles = []
+        block_piece_tiles = []
+        #get coords of allied pieces
+        for key, value in self.boardstate.items():
+            if value in ALLIED_PIECES:
+                allied_piece_tiles.append(key)
+            if value == 'B':
+                block_piece_tiles.append(key)
+
+        score = 0
+        for ally in allied_piece_tiles:
+            for block in block_piece_tiles:
+                if self.distance(ally, block) == 1:
+                    score += 1
+
+        return score

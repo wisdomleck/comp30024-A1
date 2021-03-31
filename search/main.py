@@ -14,8 +14,7 @@ import json
 # then import from them like this:
 from search.util import print_board, print_slide, print_swing, reformat_board
 from search.graph import Node, Graph
-from search.search import a_star
-from search.board_generator import boards_made, boards_considered, generate_adjacents
+from search.search import search
 
 def main():
     try:
@@ -28,25 +27,19 @@ def main():
     # TEST IF BOARD MOVE WORKS
     firstNode = Node(reformat_board(data), 0, [])
     graph = Graph(firstNode)
-    print_board(firstNode.boardstate)
-    print(firstNode.heuristic2())
-    #generate_adjacents(firstNode)
-    solution = a_star(graph)
+
+    solution = search(graph)
     path = []
     while solution:
         path.insert(0,solution)
         solution = solution.predecessor
 
     for node in path:
-        print_board(node.boardstate)
-        print(node.board_score())
         for p, q in node.moveset:
             if node.distance(p, q) == 1:
                 print_slide(node.depth, p[0], p[1], q[0], q[1])
             elif node.distance(p,q) == 2:
                 print_swing(node.depth, p[0], p[1], q[0], q[1])
-
-    print(f"boards considered: {boards_considered[0]}, boards made = {len(boards_made)}")
 
     # TODO:
     # Find and print a solution to the board configuration described

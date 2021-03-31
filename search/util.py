@@ -5,7 +5,6 @@ Project Part A: Searching
 This module contains some helper functions for printing actions and boards.
 Feel free to use and/or modify them to help you develop your program.
 """
-ALLIED_PIECES = ["R", "S", "P"]
 def print_slide(t, r_a, q_a, r_b, q_b, **kwargs):
     """
     Output a slide action for turn t of a token from hex (r_a, q_a)

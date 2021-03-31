@@ -1,6 +1,6 @@
 import heapq
-from search.util import print_board
-def a_star(graph):
+
+def search(graph):
     Q = [graph.root]
     heapq.heapify(Q)
 

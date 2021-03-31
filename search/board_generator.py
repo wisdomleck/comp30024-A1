@@ -1,17 +1,13 @@
 from itertools import product
-from queue import Queue
-from search.util import print_board
 
 COUNTER = {"R" : "s", "P": "r", "S": "p"}
 ALLIED_PIECES = ["R", "P", "S"]
 boards_made = []
-boards_considered = [0]
 
 # Applies a list of moves for each piece to the board. Assumes that in one turn, you can move one or more pieces
 # We greedily assume that there will never be two pieces of different type on the same tile
 # If we have two of the same piece on the same tile, should work fine
 def apply_turn(node, moves):
-    boards_considered[0] += 1
     # Invalidates boards where upper pieces move on to the same tile
     new_positions = [move[1] for move in moves]
     if len(set(new_positions)) < len(moves):
@@ -32,13 +28,13 @@ def apply_turn(node, moves):
 
     #Invalidates boards that have already been created since revisiting the board
     #is weakly inferior (at most as optimal)
-    if new_board in boards_made:
-        return False
-
 
     for board in boards_made:
         if equals(board, new_board):
             return False
+
+    if new_board in boards_made:
+        return False
 
     boards_made.append(new_board)
     return new_board
